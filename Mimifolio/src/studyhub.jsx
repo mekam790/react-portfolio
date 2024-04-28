@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './App.css'
 
 const Study = () => {
+    // set todo list array
     const [todo, setTodo] = useState([]);
+    // set time array that accepts minutes
     const [time, setTime] = useState(0);
+    // set timer status
     const [timerStatus, setTimerStatus] = useState('');
+    // set time input
     const [timeInput, setTimeInput] = useState('');
-
+    // based on the time status, set the timer to count down every second if running and stop timer if stopped
     useEffect(() => {
         let interval;
         if (timerStatus === 'running') {
@@ -17,44 +21,45 @@ const Study = () => {
             clearInterval(interval);
             setTime(0);
         }
-        return () => clearInterval(interval); // Cleanup function to clear interval on unmount or when timerStatus changes
+        return () => clearInterval(interval);
     }, [timerStatus]);
-    
+    // start timer and set status
     const startTimer = () => {
         if (timerStatus !== 'running') {
             setTimerStatus('running');
         }
     };
-    
+    // pause timer and set status
     const pauseTimer = () => {
         if (timerStatus === 'running') {
             setTimerStatus('paused');
         }
-        // No need to clear interval here
     };
-    
+    // stop timer and set status
     const stopTimer = () => {
         setTimerStatus('stopped');
     };
-    
+    // format time based on seconds
     const formatTime = (time) => {
         const hours = Math.floor(time / 3600)
         const minutes = Math.floor(time / 60 % 60)
         const seconds = time % 60
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
     }
+    // list functions
+
+    // on the first render, show the list
     useEffect(() => {
         showItems();
     }, []);
 
+    // get items from list
     const getItems = async () => {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
         const requestOptions = {
             method: "GET",
             redirect: "follow",
         };
-
+        // try to get items from api call
         try {
             const response = await fetch("http://127.0.0.1:8000/items", requestOptions);
             const data = await response.json();
@@ -63,9 +68,12 @@ const Study = () => {
             console.error(error);
         }
     };
+    // add item to list
     const addItem = async () => {
+        // get new item value from input
         const newItem = document.getElementById("new_item").value
 
+        // store as object for api to accept
         const raw = JSON.stringify({
             "name": newItem
         });
@@ -77,16 +85,17 @@ const Study = () => {
             body: raw,
             redirect: "follow"
         };
-
-        fetch("http://127.0.0.1:8000/items/add", requestOptions)
-            .then((response) => response.text())
-            .then((result) => console.log(result))
-            .catch((error) => console.error(error));
-        // clear input fields
-        document.getElementById("new_item").value = "";
-        showItems();
+        try {
+            await fetch("http://127.0.0.1:8000/items/add", requestOptions)
+            showItems();
+            document.getElementById("new_item").value = "";
+        } catch (error) {
+            console.error(error);
+        }
     }
+    // remove item from list
     const deleteItem = async (item) => {
+        // accept item as json object
         const raw = JSON.stringify({ "name": item });
         const requestOptions = {
             method: "DELETE",
@@ -96,17 +105,22 @@ const Study = () => {
             body: raw,
             redirect: "follow"
         };
-    
-        await fetch("http://127.0.0.1:8000/items/remove", requestOptions);
-        showItems();
+        try {
+            await fetch("http://127.0.0.1:8000/items/remove", requestOptions);
+            showItems();
+        } catch (error) {
+            console.error(error);
+        }
     }
     
     const showItems = async () => {
+        // get items and set them to list
         const items = await getItems();
         console.log(items) // Output: ['item1', 'item2', ...]
         setTodo(items);
     }
     const handleTimeInput = () => {
+        // convert minutes to seconds
         setTime(parseInt(timeInput)*60)
         document.getElementById("settime").value = '';
     }

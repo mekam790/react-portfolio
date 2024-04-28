@@ -8,6 +8,7 @@ import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './App.css';
 
 const Portfolio = () => {
+    // separate states for dialectable carousel and other images
     const [dCaption, setdCaption] = useState('');
     const [otherCaption, setotherCaption] = useState('');
     const [dialectableIndex, setDialectableIndex] = useState(0);
@@ -38,7 +39,7 @@ const Portfolio = () => {
                 "to the fact that the projects kids make can be used as a conversation starter."
         }
     ];
-
+    // reveals captions for images based on index and whether they belong to the dialectable project
     function revealCaption(index, isDialectable) {
         if (isDialectable) {
             setDialectableIndex(index);
@@ -49,10 +50,11 @@ const Portfolio = () => {
         }
     }
 
-
+    // shows next image based on index
     function nextImage() {
         setDialectableIndex(dialectableIndex + 1);
     }
+    // shows previous image based on index
     function prevImage() {
         setDialectableIndex(dialectableIndex - 1);
     }
